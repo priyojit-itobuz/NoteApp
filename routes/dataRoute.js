@@ -2,9 +2,7 @@ import express from "express"
 import { addNote, addUser } from "../controllers/addData.js";
 import { getNote, getUser } from "../controllers/getData.js";
 import { login, register, verifyToken } from "../middlewares/verify.js";
-// import user from '../models/userModel.js'
-// import jwt from "jsonwebtoken"
-// import bcrypt from "bcryptjs"
+
 
 const route = express.Router();
 
