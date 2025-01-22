@@ -1,12 +1,9 @@
 import express from "express"
 import { addNote, addUser } from "../controllers/addData.js";
 import { getNote, getUser } from "../controllers/getData.js";
-<<<<<<< HEAD
-import { login, register, verifyToken } from "../middlewares/verify.js";
-=======
 import { login, register } from "../controllers/mailController.js";
 import { verifyToken } from "../middlewares/verify.js";
->>>>>>> dadec58 (Feat: Token Verification done)
+
 
 
 const route = express.Router();
