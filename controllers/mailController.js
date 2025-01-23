@@ -3,9 +3,7 @@ import bcrypt from "bcryptjs";
 import user from "../models/userModel.js";
 import nodemailer from "nodemailer";
 
-
 //SignUp or Register User
-
 export const register = async (req, res) => {
     try {
       // Check if the email already exists
