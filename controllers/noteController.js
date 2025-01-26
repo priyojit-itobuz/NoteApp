@@ -167,28 +167,76 @@ export const deleteNote = async (req, res) => {
   }
 };
 
+// search by title or content but with particular userId
+
 export const search = async (req, res) => {
   try {
-    const {userId} = req.body
+    const { userId, searchText } = req.body; 
+
+    if (!userId || !searchText) {
+      return res.status(400).json({
+        success: false,
+        message: "userId and searchText are required.",
+      });
+    }
+
     const notes = await note.find({
       userId,
       $or: [
-        { title: { $regex: `${searchText}`, $options: "i" } },
-        { body: { $regex: `${searchText}`, $options: "i" } },
+        { title: { $regex: searchText, $options: "i" } }, 
+        { content: { $regex: searchText, $options: "i" } }, // options i means case insensitive matching
       ],
     });
-    if(notes)
-    {
-      res.status(200).json({
-        success : true,
-        message : "data fetched",
-        notes
-      })
+
+    if (notes.length > 0) {
+      return res.status(200).json({
+        success: true,
+        message: "Notes fetched successfully.",
+        notes,
+      });
+    } else {
+      return res.status(404).json({
+        success: false,
+        message: "No notes found.",
+      });
     }
   } catch (error) {
     res.status(500).json({
       success: false,
       message: error.message,
+    });
+  }
+};
+
+
+
+
+// Get paginated notes
+export const getPaginatedNotes = async (req, res) => {
+  try {
+    const page = parseInt(req.query.page) || 1; // Default to page 1
+    const limit = parseInt(req.query.limit) || 5; // 5 notes per page
+
+    // Calculating the skip value
+    const skip = (page - 1) * limit;
+
+    // Getting notes with pagination
+    const notes = await note
+      .find()
+      .skip(skip)
+      .limit(limit)
+
+
+    res.status(200).json({
+      success: true,
+      message : "Notes fetched as per query",
+      data: notes
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: error.message,
+      data: "Internal server error",
     });
   }
 };

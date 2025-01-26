@@ -90,32 +90,35 @@ export const login = async (req, res) => {
   }
 };
 
-// export const search = async(req,res) => {
-//   try{
-//     const filters = req.query;
-//     console.log(filters);
-    
-//     const allUsers = await user.find({userName : filters.title})
-//     if(!allUsers || allUsers.length === 0) 
-//       {
-//         res.status(400).json({
-//           success : false,
-//           message : "No task was found"
-//         })
-//       }
-//     res.status(200).json({
-//       success : true,
-//       message: "Search success",
-//       allUsers
-//     })
-//   }
-//   catch(error)
-//   {
-//     res.status(500).json({
-//       success : false,
-//       message : error.message
-//     })
-//   }
-// }
+export const logout = async(req,res) => {
+  try {
+    const id = req.params.id;
+    const searchUser = await user.findById(id)
+    if(searchUser && searchUser.isVerified === true)
+    {
+        searchUser.isVerified = false;
+        searchUser.save();
+        res.status(200).json({
+          success: true,
+          message: "User logout success"
+        })
+    }
+    else
+    {
+      res.status(400).json({
+        success : false,
+        message : "User is not logged In, Login first"
+      })
+    }
+  }
+  catch(error)
+  {
+    res.status(500).json({
+      success : false,
+      message : "Internal Server Error"
+    })
+  }
+
+}
 
 
