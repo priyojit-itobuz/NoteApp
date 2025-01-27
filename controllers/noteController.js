@@ -1,12 +1,13 @@
 import note from "../models/noteModel.js";
 import user from "../models/userModel.js";
+import jwt from "jsonwebtoken";
 
 // add note based on usedId
 export const addNote = async (req, res) => {
   try {
     const userId = req.params.id;
-    const { title, content} = req.body;
-    const response = await note.create({ title, content,userId});
+    const { title, content } = req.body;
+    const response = await note.create({ title, content, userId });
 
     if (response) {
       res.status(200).json({
@@ -123,24 +124,34 @@ export const updateNote = async (req, res) => {
     const searchNote = await note.findById(id);
     const searchUser = searchNote.userId;
     const findUser = await user.findById(searchUser);
-    console.log("at",findUser.accessToken);
-    
 
-    if (!findUser.isVerified || !findUser.accessToken) {
-      res.status(400).json({
-        success: false,
-        message: "user not logged in",
-      });
-    }
-    const updatedNote = await note.findByIdAndUpdate(
-      { _id: id },
-      { title, content }
+    jwt.verify(
+      findUser.accessToken,
+      process.env.SECRET_KEY,
+      async (error, decoded) => {
+        if (error) {
+          return res.status(401).json({ success: false, error: "JWT expired" });
+        } else {
+          if (!findUser.isVerified || !findUser.accessToken) {
+            return res.status(403).json({
+              success: false,
+              message:
+                "User is not logged in or not verified or AccessToken missing",
+            });
+          }
+
+          const updatedNote = await note.findByIdAndUpdate(
+            { _id: id },
+            { title, content }
+          );
+          res.status(200).json({
+            success: true,
+            message: "Note updated Success",
+            data: updatedNote,
+          });
+        }
+      }
     );
-    res.status(200).json({
-      success: true,
-      message: "Note updated Success",
-      data: updatedNote,
-    });
   } catch (error) {
     res.status(500).json({
       success: false,
@@ -151,16 +162,37 @@ export const updateNote = async (req, res) => {
 };
 
 // delete note based on note id
-
 export const deleteNote = async (req, res) => {
   try {
     const id = req.params.id;
-    const deleteNote = await note.findByIdAndDelete(id);
-    res.status(200).json({
-      success: true,
-      message: "Note Deleted Success",
-      deleteNote,
-    });
+    const searchNote = await note.findById(id);
+    const searchUser = searchNote.userId;
+    const findUser = await user.findById(searchUser);
+
+    jwt.verify(
+      findUser.accessToken,
+      process.env.SECRET_KEY,
+      async (error, decoded) => {
+        if (error) {
+          return res.status(401).json({ success: false, error: "JWT expired" });
+        } else {
+          if (!findUser.isVerified || !findUser.accessToken) {
+            return res.status(403).json({
+              success: false,
+              message:
+                "User is not logged in or not verified or AccessToken missing",
+            });
+          }
+
+          const deleteNote = await note.findByIdAndDelete(id);
+          res.status(200).json({
+            success: true,
+            message: "Note Deleted Success",
+            deleteNote,
+          });
+        }
+      }
+    );
   } catch (error) {
     res.status(500).json({
       success: false,
@@ -173,7 +205,7 @@ export const deleteNote = async (req, res) => {
 
 export const search = async (req, res) => {
   try {
-    const { userId, searchText } = req.body; 
+    const { userId, searchText } = req.body;
 
     if (!userId || !searchText) {
       return res.status(400).json({
@@ -185,7 +217,7 @@ export const search = async (req, res) => {
     const notes = await note.find({
       userId,
       $or: [
-        { title: { $regex: searchText, $options: "i" } }, 
+        { title: { $regex: searchText, $options: "i" } },
         { content: { $regex: searchText, $options: "i" } }, // options i means case insensitive matching
       ],
     });
@@ -210,12 +242,9 @@ export const search = async (req, res) => {
   }
 };
 
-
-
-
 // Get paginated notes
 export const getPaginatedNotes = async (req, res) => {
-  try {    
+  try {
     const page = parseInt(req.query.page) || 1; // Default to page 1
     const limit = parseInt(req.query.limit) || 5; // 5 notes per page
 
@@ -223,16 +252,12 @@ export const getPaginatedNotes = async (req, res) => {
     const skip = (page - 1) * limit;
 
     // Getting notes with pagination
-    const notes = await note
-      .find()
-      .skip(skip)
-      .limit(limit)
-
+    const notes = await note.find().skip(skip).limit(limit);
 
     res.status(200).json({
       success: true,
-      message : "Notes fetched as per query",
-      data: notes
+      message: "Notes fetched as per query",
+      data: notes,
     });
   } catch (error) {
     res.status(500).json({

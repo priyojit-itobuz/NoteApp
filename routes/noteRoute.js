@@ -15,7 +15,7 @@ route.get("/paginated",getPaginatedNotes)
 route.post("/search",isLoggedIn,search);
 
 route.put("/updateNote/:id",validate(noteSchema),updateNote)
-route.delete("/deleteNote/:id",isLoggedIn,deleteNote);
+route.delete("/deleteNote/:id",deleteNote);
 
 
 export default route;
