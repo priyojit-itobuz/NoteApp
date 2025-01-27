@@ -5,12 +5,15 @@ import { noteSchema } from '../validators/dataValidation.js';
 import { isLoggedIn } from '../middlewares/loginStatus.js';
 const route = express.Router();
 
-route.post("/addNote",isLoggedIn,validate(noteSchema),addNote);
+route.post("/addNote/:id",isLoggedIn,validate(noteSchema),addNote);
 route.get("/getAllNote",getAllNote)
 route.get("/getOneNote/:id",getOneNote)
-route.get("/oneNote/:id",getParticularUserNote);
+route.get("/oneNote/:id",isLoggedIn,getParticularUserNote);
+
+//user validation not done
 route.get("/paginated",getPaginatedNotes)
 route.post("/search",isLoggedIn,search);
+
 route.put("/updateNote/:id",validate(noteSchema),updateNote)
 route.delete("/deleteNote/:id",isLoggedIn,deleteNote);
 

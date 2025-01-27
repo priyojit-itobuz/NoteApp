@@ -13,6 +13,6 @@ export const loginUser = yup.object({
 });
 
 export const noteSchema = yup.object({
-    title: yup.string().required('Title is required').trim().min(3, 'Title must be at least 3 characters'),
-    content: yup.string().required('Content is required')
+    title: yup.string().trim().min(3, 'Title must be at least 3 characters'),
+    content: yup.string()
 })

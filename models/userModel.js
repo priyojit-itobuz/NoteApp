@@ -17,6 +17,9 @@ const userModel = new mongoose.Schema({
   token: {
     type: String,
   },
+  accessToken : {
+    type : String,
+  },
   isVerified: {
     type: Boolean,
     default: false,

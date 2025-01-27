@@ -1,12 +1,12 @@
-import { isLoggedIn } from "../middlewares/loginStatus.js";
 import note from "../models/noteModel.js";
 import user from "../models/userModel.js";
 
 // add note based on usedId
 export const addNote = async (req, res) => {
   try {
-    const { title, content, userId } = req.body;
-    const response = await note.create({ title, content, userId });
+    const userId = req.params.id;
+    const { title, content} = req.body;
+    const response = await note.create({ title, content,userId});
 
     if (response) {
       res.status(200).json({
@@ -123,8 +123,10 @@ export const updateNote = async (req, res) => {
     const searchNote = await note.findById(id);
     const searchUser = searchNote.userId;
     const findUser = await user.findById(searchUser);
+    console.log("at",findUser.accessToken);
+    
 
-    if (!findUser.isVerified) {
+    if (!findUser.isVerified || !findUser.accessToken) {
       res.status(400).json({
         success: false,
         message: "user not logged in",
@@ -213,7 +215,7 @@ export const search = async (req, res) => {
 
 // Get paginated notes
 export const getPaginatedNotes = async (req, res) => {
-  try {
+  try {    
     const page = parseInt(req.query.page) || 1; // Default to page 1
     const limit = parseInt(req.query.limit) || 5; // 5 notes per page
 

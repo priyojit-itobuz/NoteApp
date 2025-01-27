@@ -36,16 +36,20 @@ export const register = async (req, res) => {
     }
 
     // If the email doesn't exist, create a new user
-    const token = jwt.sign({}, process.env.SECRET_KEY, { expiresIn: '10m' });
+    // const token = jwt.sign({_id}, process.env.SECRET_KEY, { expiresIn: '10m' });
     const hashedPassword = await bcrypt.hash(password, 10);
 
     const newUser = new user({
       userName,
       email,
       password: hashedPassword,
-      token,
     });
 
+    await newUser.save();
+    const userId = newUser._id;
+    const token = jwt.sign({userId}, process.env.SECRET_KEY, { expiresIn: '10m' });
+    newUser.token = token;
+    newUser.accessToken = "";
     await newUser.save();
     mailSender(token);
 
@@ -80,6 +84,9 @@ export const login = async (req, res) => {
     if (!passwordMatch) {
       return res.status(401).json({ error: "Invalid credentials" });
     }
+    const accessToken = jwt.sign({}, process.env.SECRET_KEY, { expiresIn: '10m' });
+    currentUser.accessToken = accessToken;
+    await currentUser.save();
 
     res.status(200).json({
       success: true,

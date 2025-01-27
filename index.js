@@ -1,13 +1,13 @@
 import express from 'express'
 import dbConnect from './config/dbConnection.js';
-import dotenv from 'dotenv'
+import dotenv from 'dotenv/config'
 import route from "./routes/userRoute.js"
 import routes from "./routes/noteRoute.js"
 
 const app = express();
 app.use(express.json());
 
-dotenv.config({ path: '.env' }); 
+
 
 const PORT = process.env.PORT
 
