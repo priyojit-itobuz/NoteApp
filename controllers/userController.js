@@ -14,7 +14,8 @@ export const register = async (req, res) => {
     if (existingUser) {
       if (!existingUser.isVerified) {
         // If the user exists but is not verified, update the token and password
-        const token = jwt.sign({_id}, process.env.SECRET_KEY, { expiresIn: '10m' });
+        const autoId = user._id;
+        const token = jwt.sign({autoId}, process.env.SECRET_KEY, { expiresIn: '10m' });
         const hashedPassword = await bcrypt.hash(password, 10);
 
         existingUser.userName = userName;

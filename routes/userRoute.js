@@ -8,7 +8,8 @@ const route = express.Router();
 
 route.post("/register",validate(signupUser),register);
 route.post("/login",validate(loginUser),login)
-route.get("/verify/:token",verifyToken)
+// route.get("/verify/:token",verifyToken)
+route.get("/verify",verifyToken)
 route.get("/logout/:id",logout)
 
 
