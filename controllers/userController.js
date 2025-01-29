@@ -20,7 +20,6 @@ export const register = async (req, res) => {
 
         existingUser.userName = userName;
         existingUser.password = hashedPassword;
-        existingUser.token = token;
 
         await existingUser.save();
         mailSender(token);
@@ -48,9 +47,8 @@ export const register = async (req, res) => {
     await newUser.save();
     const userId = newUser._id;
     const token = jwt.sign({userId}, process.env.SECRET_KEY, { expiresIn: '10m' });
-    newUser.token = token;
-    newUser.accessToken = "";
-    await newUser.save();
+    // newUser.accessToken = "";
+    // await newUser.save();
     mailSender(token);
 
     res.status(201).json({
@@ -72,6 +70,8 @@ export const login = async (req, res) => {
   try {
     // Check if the email exists
     const currentUser = await user.findOne({ email: req.body.email });
+    const userId = currentUser._id;
+    
 
     if (!currentUser) {
       return res.status(401).json({ error: "Invalid credentials" });
@@ -84,18 +84,20 @@ export const login = async (req, res) => {
     if (!passwordMatch) {
       return res.status(401).json({ error: "Invalid credentials" });
     }
-    const accessToken = jwt.sign({}, process.env.SECRET_KEY, { expiresIn: '5m' });
-    currentUser.accessToken = accessToken;
-    await currentUser.save();
+    const accessToken = jwt.sign({userId}, process.env.SECRET_KEY, { expiresIn: '5m' });
+    // currentUser.accessToken = accessToken;
+    // await currentUser.save();
 
     res.status(200).json({
       success: true,
       message: "Logged In",
+      accessToken
     });
   } catch (error) {
     res.status(500).json({ error: "Internal server error" });
   }
 };
+
 
 export const logout = async(req,res) => {
   try {

@@ -5,7 +5,8 @@ import jwt from "jsonwebtoken";
 // add note based on usedId
 export const addNote = async (req, res) => {
   try {
-    const userId = req.params.id;
+    const userId = req.body.userId;
+
     const { title, content } = req.body;
     const response = await note.create({ title, content, userId });
 
@@ -57,7 +58,8 @@ export const getAllNote = async (req, res) => {
 export const getParticularUserNote = async (req, res) => {
   try {
     //  checking if desired userId present or note, if present return all the objects that have same userId
-    const userId = req.params.id;
+    const userId = req.body.userId;
+
     const currentUserId = await note.find({ userId });
     console.log(currentUserId);
 
@@ -125,33 +127,15 @@ export const updateNote = async (req, res) => {
     const searchUser = searchNote.userId;
     const findUser = await user.findById(searchUser);
 
-    jwt.verify(
-      findUser.accessToken,
-      process.env.SECRET_KEY,
-      async (error, decoded) => {
-        if (error) {
-          return res.status(401).json({ success: false, error: "JWT expired" });
-        } else {
-          if (!findUser.isVerified || !findUser.accessToken) {
-            return res.status(403).json({
-              success: false,
-              message:
-                "User is not logged in or not verified or AccessToken missing",
-            });
-          }
-
-          const updatedNote = await note.findByIdAndUpdate(
-            { _id: id },
-            { title, content }
-          );
-          res.status(200).json({
-            success: true,
-            message: "Note updated Success",
-            data: updatedNote,
-          });
-        }
-      }
+    const updatedNote = await note.findByIdAndUpdate(
+      { _id: id },
+      { title, content }
     );
+    res.status(200).json({
+      success: true,
+      message: "Note updated Success",
+      data: updatedNote,
+    });
   } catch (error) {
     res.status(500).json({
       success: false,
@@ -169,30 +153,12 @@ export const deleteNote = async (req, res) => {
     const searchUser = searchNote.userId;
     const findUser = await user.findById(searchUser);
 
-    jwt.verify(
-      findUser.accessToken,
-      process.env.SECRET_KEY,
-      async (error, decoded) => {
-        if (error) {
-          return res.status(401).json({ success: false, error: "JWT expired" });
-        } else {
-          if (!findUser.isVerified || !findUser.accessToken) {
-            return res.status(403).json({
-              success: false,
-              message:
-                "User is not logged in or not verified or AccessToken missing",
-            });
-          }
-
-          const deleteNote = await note.findByIdAndDelete(id);
-          res.status(200).json({
-            success: true,
-            message: "Note Deleted Success",
-            deleteNote,
-          });
-        }
-      }
-    );
+    const deleteNote = await note.findByIdAndDelete(id);
+    res.status(200).json({
+      success: true,
+      message: "Note Deleted Success",
+      deleteNote,
+    });
   } catch (error) {
     res.status(500).json({
       success: false,
