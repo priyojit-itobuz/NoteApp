@@ -15,7 +15,9 @@ export const register = async (req, res) => {
       if (!existingUser.isVerified) {
         // If the user exists but is not verified, update the token and password
         const autoId = user._id;
-        const token = jwt.sign({autoId}, process.env.SECRET_KEY, { expiresIn: '10m' });
+        const token = jwt.sign({ autoId }, process.env.SECRET_KEY, {
+          expiresIn: "10m",
+        });
         const hashedPassword = await bcrypt.hash(password, 10);
 
         existingUser.userName = userName;
@@ -26,12 +28,15 @@ export const register = async (req, res) => {
 
         return res.status(200).json({
           success: true,
-          message: "User already exists but not verified. Verification email sent again.",
+          message:
+            "User already exists but not verified. Verification email sent again.",
           token,
         });
       } else {
         // If the user exists and is verified, prevent duplicate registration
-        return res.status(400).json({ error: "Email is already registered and verified." });
+        return res
+          .status(400)
+          .json({ error: "Email is already registered and verified." });
       }
     }
 
@@ -46,7 +51,9 @@ export const register = async (req, res) => {
 
     await newUser.save();
     const userId = newUser._id;
-    const token = jwt.sign({userId}, process.env.SECRET_KEY, { expiresIn: '10m' });
+    const token = jwt.sign({ userId }, process.env.SECRET_KEY, {
+      expiresIn: "10m",
+    });
     // newUser.accessToken = "";
     // await newUser.save();
     mailSender(token);
@@ -71,7 +78,6 @@ export const login = async (req, res) => {
     // Check if the email exists
     const currentUser = await user.findOne({ email: req.body.email });
     const userId = currentUser._id;
-    
 
     if (!currentUser) {
       return res.status(401).json({ error: "Invalid credentials" });
@@ -84,50 +90,79 @@ export const login = async (req, res) => {
     if (!passwordMatch) {
       return res.status(401).json({ error: "Invalid credentials" });
     }
-    const accessToken = jwt.sign({userId}, process.env.SECRET_KEY, { expiresIn: '5m' });
-    // currentUser.accessToken = accessToken;
-    // await currentUser.save();
+    const accessToken = jwt.sign({ userId }, process.env.SECRET_KEY, {
+      expiresIn: "5m",
+    });
+    const refreshToken = jwt.sign({ userId }, process.env.SECRET_KEY, {
+      expiresIn: "15d",
+    });
 
     res.status(200).json({
       success: true,
       message: "Logged In",
-      accessToken
+      accessToken,
+      refreshToken,
     });
   } catch (error) {
     res.status(500).json({ error: "Internal server error" });
   }
 };
 
+export const regenerateAccessToken = async (req, res) => {
+  const authHeader = req.headers.authorization;
+  const refreshToken = authHeader.split(" ")[1];
 
-export const logout = async(req,res) => {
-  try {
-    const id = req.params.id;
-    const searchUser = await user.findById(id)
-    if(searchUser && searchUser.isVerified === true)
-    {
-        searchUser.isVerified = false;
-        searchUser.save();
-        res.status(200).json({
-          success: true,
-          message: "User logout success"
-        })
-    }
-    else
-    {
+  if (!refreshToken) {
+    return res.status(401).json({ error: "Unauthorized" });
+  }
+
+  jwt.verify(refreshToken,process.env.SECRET_KEY, async (error, decoded) => {
+    if (error) {
       res.status(400).json({
         success : false,
-        message : "User is not logged In, Login first"
+        message : "Error in refreshToken or expired"
       })
     }
-  }
-  catch(error)
-  {
+    else 
+    {
+      const userId = decoded.userId;
+      req.body.userId  =  userId;
+      const userVerify = await user.findById(userId);
+      console.log("finding user in loginMiddleware",userVerify);
+      const accessToken = jwt.sign({ userId }, process.env.SECRET_KEY, {
+        expiresIn: "5m",
+      });
+      return res.status(200).json({
+        success : true,
+        accessToken
+      })      
+    }
+  });
+
+};
+
+export const logout = async (req, res) => {
+  // delete session based on particular user
+  try {
+    const id = req.params.id;
+    const searchUser = await user.findById(id);
+    if (searchUser && searchUser.isVerified === true) {
+      searchUser.isVerified = false;
+      searchUser.save();
+      res.status(200).json({
+        success: true,
+        message: "User logout success",
+      });
+    } else {
+      res.status(400).json({
+        success: false,
+        message: "User is not logged In, Login first",
+      });
+    }
+  } catch (error) {
     res.status(500).json({
-      success : false,
-      message : "Internal Server Error"
-    })
+      success: false,
+      message: "Internal Server Error",
+    });
   }
-
-}
-
-
+};
