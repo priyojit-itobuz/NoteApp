@@ -170,7 +170,10 @@ export const deleteNote = async (req, res) => {
 
 export const search = async (req, res) => {
   try {
-    const { userId, searchText } = req.body;
+    const userId = req.body.userId;
+    console.log("search",userId);
+    
+    const {searchText} = req.body;
 
     if (!userId || !searchText) {
       return res.status(400).json({
@@ -179,12 +182,8 @@ export const search = async (req, res) => {
       });
     }
 
-    const notes = await note.find({
-      userId,
-      $or: [
-        { title: { $regex: searchText, $options: "i" } },
-        { content: { $regex: searchText, $options: "i" } }, // options i means case insensitive matching
-      ],
+    const notes = await note.find({userId,
+       title: { $regex: searchText, $options: "i" } 
     });
 
     if (notes.length > 0) {
@@ -210,6 +209,7 @@ export const search = async (req, res) => {
 // Get paginated notes
 export const getPaginatedNotes = async (req, res) => {
   try {
+    const userId = req.body.userId;
     const page = parseInt(req.query.page) || 1; // Default to page 1
     const limit = parseInt(req.query.limit) || 5; // 5 notes per page
 
@@ -217,7 +217,7 @@ export const getPaginatedNotes = async (req, res) => {
     const skip = (page - 1) * limit;
 
     // Getting notes with pagination
-    const notes = await note.find().skip(skip).limit(limit);
+    const notes = await note.find({userId}).skip(skip).limit(limit);
 
     res.status(200).json({
       success: true,
@@ -232,3 +232,23 @@ export const getPaginatedNotes = async (req, res) => {
     });
   }
 };
+
+
+export const sortNotes = async(req,res) => {
+  try{ 
+    const userId = req.body.userId;
+  const sortCriteria = { [req.query.sortField]: req.query.sortOrder === 'asc' ? 1 : -1 };
+  const sortedDocuments = await note.find({userId}).sort(sortCriteria);
+  return res.status(200).json({
+    success : true,
+    sortedDocuments
+  })
+}
+  catch(error)
+  {
+    return res.status(500).json({
+      success : false,
+      message : "Internal Server Error"
+    })
+  }
+}
