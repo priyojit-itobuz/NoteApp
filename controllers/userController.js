@@ -96,7 +96,7 @@ export const login = async (req, res) => {
       return res.status(401).json({ error: "Invalid credentials" });
     }
     const accessToken = jwt.sign({ userId }, process.env.SECRET_KEY, {
-      expiresIn: "5m",
+      expiresIn: "15m",
     });
     const refreshToken = jwt.sign({ userId }, process.env.SECRET_KEY, {
       expiresIn: "15d",
@@ -136,7 +136,7 @@ export const regenerateAccessToken = async (req, res) => {
       req.body.userId  =  userId;
       const userVerify = await user.findById(userId);
       const accessToken = jwt.sign({ userId }, process.env.SECRET_KEY, {
-        expiresIn: "5m",
+        expiresIn: "15m",
       });
       return res.status(200).json({
         success : true,

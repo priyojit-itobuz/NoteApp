@@ -7,7 +7,7 @@ export const isLoggedIn = async (req, res, next) => {
   try {
     const authHeader = req.headers.authorization;
   
-    if(authHeader)
+    if(authHeader && authHeader.startsWith("Bearer"))
     {
       const accessToken = authHeader.split(" ")[1];
       if (!accessToken) 

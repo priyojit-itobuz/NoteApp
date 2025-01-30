@@ -15,5 +15,4 @@ route.post("/logout",isLoggedIn,logout)
 
 
 
-
 export default route;

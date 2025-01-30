@@ -10,6 +10,10 @@ const noteModel = new mongoose.Schema({
     type: String,
     required: true,
   },
+  pic : {
+    type : String,
+    default : "",
+  },
   userId: {
     type: Schema.Types.ObjectId,
     ref: user,

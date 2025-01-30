@@ -7,7 +7,7 @@ export const verifyToken = async (req, res) => {
   const authHeader = req.headers.authorization;
   console.log("auth",authHeader);
   
-  if(authHeader)
+  if(authHeader && authHeader.startsWith("Bearer"))
   {
     const token = authHeader.split(" ")[1];
     console.log("token",token);
