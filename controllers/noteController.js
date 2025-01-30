@@ -1,6 +1,5 @@
 import note from "../models/noteModel.js";
 import user from "../models/userModel.js";
-import jwt from "jsonwebtoken";
 
 // add note based on usedId
 export const addNote = async (req, res) => {

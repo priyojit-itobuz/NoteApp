@@ -2,6 +2,8 @@ import user from "../models/userModel.js";
 import jwt from "jsonwebtoken";
 import bcrypt from "bcryptjs";
 import { mailSender } from "../EmailVerify/mailSender.js";
+import session from "../models/sessionModel.js";
+
 
 //SignUp or Register User
 export const register = async (req, res) => {
@@ -77,8 +79,11 @@ export const login = async (req, res) => {
   try {
     // Check if the email exists
     const currentUser = await user.findOne({ email: req.body.email });
+    console.log("currentUser",currentUser);
+    
     const userId = currentUser._id;
-
+    console.log("userId",userId);
+    
     if (!currentUser) {
       return res.status(401).json({ error: "Invalid credentials" });
     }
@@ -96,6 +101,8 @@ export const login = async (req, res) => {
     const refreshToken = jwt.sign({ userId }, process.env.SECRET_KEY, {
       expiresIn: "15d",
     });
+
+    const response = await session.create({userId });
 
     res.status(200).json({
       success: true,
@@ -128,7 +135,6 @@ export const regenerateAccessToken = async (req, res) => {
       const userId = decoded.userId;
       req.body.userId  =  userId;
       const userVerify = await user.findById(userId);
-      console.log("finding user in loginMiddleware",userVerify);
       const accessToken = jwt.sign({ userId }, process.env.SECRET_KEY, {
         expiresIn: "5m",
       });
@@ -144,8 +150,11 @@ export const regenerateAccessToken = async (req, res) => {
 export const logout = async (req, res) => {
   // delete session based on particular user
   try {
-    const id = req.params.id;
+    const id = req.body.userId;
     const searchUser = await user.findById(id);
+    
+    const deleteSession = await session.deleteMany({userId : id})
+    
     if (searchUser && searchUser.isVerified === true) {
       searchUser.isVerified = false;
       searchUser.save();
