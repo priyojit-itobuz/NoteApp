@@ -1,6 +1,6 @@
 import multer from 'multer'
 import path from 'path'
-import user from "../models/userModel.js";
+// import user from "../models/userModel.js";
 import note from "../models/noteModel.js";
 
 const storage = multer.diskStorage({

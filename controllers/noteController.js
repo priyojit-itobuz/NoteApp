@@ -7,6 +7,14 @@ export const addNote = async (req, res) => {
     const userId = req.body.userId;
 
     const { title, content } = req.body;
+    const existingNote = await note.findOne({ userId, title });
+    if (existingNote) {
+      return res.status(400).json({
+        success: false,
+        message: "Note with the same title already exists for this user",
+      });
+    }
+    
     const response = await note.create({ title, content, userId });
 
     if (response) {
