@@ -22,8 +22,6 @@ export const isLoggedIn = async (req, res, next) => {
       } else 
       {
         const id = decoded.userId;
-        console.log("auth id",id);
-        
         req.body.userId  =  id;
         const userVerify = await user.findById(id);
         const resp = await session.findOne({userId : id});

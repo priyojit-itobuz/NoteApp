@@ -2,24 +2,23 @@ import nodemailer from "nodemailer";
 import hbs from 'nodemailer-express-handlebars'
 
 export const mailSender = async (token) => {
-    console.log(token);
   
     const transporter = nodemailer.createTransport({
       service: "gmail",
       auth: {
         user: "priyojit@itobuz.com",
-        pass: "kjwj bbqd bgke ndym",
+        pass: process.env.MAIL_PASSWORD,
       },
     });
 
     transporter.use('compile', hbs({
       viewEngine: {
           extname: '.hbs',
-          layoutsDir: './template',
+          layoutsDir: './src/template',
           defaultLayout: false,
-          partialsDir: './template',
+          partialsDir: './src/template',
       },
-      viewPath: './template',
+      viewPath: './src/template',
       extName: '.hbs'
   }));
 
@@ -39,7 +38,6 @@ export const mailSender = async (token) => {
       if (error) 
       {
         console.log(error);
-        
       }
       else {
         console.log("Email sent successfully");

@@ -18,10 +18,9 @@ export const upload = multer({
 export const uploadNotes = async(req,res) => {
     
     const id = req.params.id;
-    console.log("id",id);
     
     if (!req.file) {
-        return res.status(400).send('No file uploaded.');
+        return res.status(400).json({message : 'No file uploaded.'});
     }
     const Note = await note.findById(id);
     if(Note)

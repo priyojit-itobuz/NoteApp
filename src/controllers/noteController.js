@@ -5,17 +5,15 @@ import user from "../models/userModel.js";
 export const addNote = async (req, res) => {
   try {
     const userId = req.body.userId;
-    //do insert same title for different user 
     const { title, content } = req.body;
-    const findTitle = await note.findOne({userId,title});
-    if(findTitle)
-    {
-       return res.status(400).json({
-        success : false,
-        message : "Note Title already exists"
-       })
+    const findTitle = await note.findOne({ userId, title });
+    if (findTitle) {
+      return res.status(400).json({
+        success: false,
+        message: "Note Title already exists",
+      });
     }
-    
+
     const response = await note.create({ title, content, userId });
 
     if (response) {
@@ -69,7 +67,6 @@ export const getParticularUserNote = async (req, res) => {
     const userId = req.body.userId;
 
     const currentUserId = await note.find({ userId });
-    console.log(currentUserId);
 
     if (!currentUserId.length) {
       return res.status(400).json({
@@ -128,17 +125,15 @@ export const getOneNote = async (req, res) => {
 export const updateNote = async (req, res) => {
   try {
     const id = req.params.id;
-    console.log(id);
     const userId = req.body.userId;
 
     const { title, content } = req.body;
-    const findTitle = await note.findOne({userId,title});
-    if(findTitle)
-    {
-       return res.status(400).json({
-        success : false,
-        message : "Note Title already exists"
-       })
+    const findTitle = await note.findOne({ userId, title });
+    if (findTitle) {
+      return res.status(400).json({
+        success: false,
+        message: "Note Title already exists",
+      });
     }
 
     const searchNote = await note.findById(id);
@@ -168,10 +163,18 @@ export const deleteNote = async (req, res) => {
   try {
     const id = req.params.id;
     const searchNote = await note.findById(id);
+    if (!searchNote) {
+      return res.status(404).json({
+        success: false,
+        message: "Note Already deleted",
+      });
+    }
+
     const searchUser = searchNote.userId;
     const findUser = await user.findById(searchUser);
 
     const deleteNote = await note.findByIdAndDelete(id);
+
     res.status(200).json({
       success: true,
       message: "Note Deleted Success",
@@ -190,9 +193,8 @@ export const deleteNote = async (req, res) => {
 export const search = async (req, res) => {
   try {
     const userId = req.body.userId;
-    console.log("search",userId);
-    
-    const {searchText} = req.body;
+
+    const { searchText } = req.body;
 
     if (!userId || !searchText) {
       return res.status(400).json({
@@ -201,11 +203,10 @@ export const search = async (req, res) => {
       });
     }
 
-    const notes = await note.find({userId,
-       title: { $regex: searchText, $options: "i" } 
+    const notes = await note.find({
+      userId,
+      title: { $regex: searchText, $options: "i" },
     });
-
-    
 
     if (notes.length > 0) {
       return res.status(200).json({
@@ -238,7 +239,7 @@ export const getPaginatedNotes = async (req, res) => {
     const skip = (page - 1) * limit;
 
     // Getting notes with pagination
-    const notes = await note.find({userId}).skip(skip).limit(limit);
+    const notes = await note.find({ userId }).skip(skip).limit(limit);
 
     res.status(200).json({
       success: true,
@@ -254,22 +255,21 @@ export const getPaginatedNotes = async (req, res) => {
   }
 };
 
-
-export const sortNotes = async(req,res) => {
-  try{ 
+export const sortNotes = async (req, res) => {
+  try {
     const userId = req.body.userId;
-  const sortCriteria = { [req.query.sortField]: req.query.sortOrder === 'asc' ? 1 : -1 };
-  const sortedDocuments = await note.find({userId}).sort(sortCriteria);
-  return res.status(200).json({
-    success : true,
-    sortedDocuments
-  })
-}
-  catch(error)
-  {
+    const sortCriteria = {
+      [req.query.sortField]: req.query.sortOrder === "asc" ? 1 : -1,
+    };
+    const sortedDocuments = await note.find({ userId }).sort(sortCriteria);
+    return res.status(200).json({
+      success: true,
+      sortedDocuments,
+    });
+  } catch (error) {
     return res.status(500).json({
-      success : false,
-      message : "Internal Server Error"
-    })
+      success: false,
+      message: "Internal Server Error",
+    });
   }
-}
+};

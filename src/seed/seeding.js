@@ -20,7 +20,7 @@ async function reset () {
 async function createDummy() {
     await dummyUser(5)
     await dummyNotes(5)
-     mongoose.connection.close()
+    mongoose.connection.close()
 }
 
 await reset()

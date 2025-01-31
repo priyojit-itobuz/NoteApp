@@ -6,9 +6,6 @@ const dummyNotes = async (num) => {
   const notes = [];
 
   const allUsers = await user.find();
-  
-  
-
   for (let i = 1; i <= num; i++) {
     const title = faker.person.jobTitle();
     const content = faker.lorem.sentences(1);

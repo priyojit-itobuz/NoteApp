@@ -56,8 +56,6 @@ export const register = async (req, res) => {
     const token = jwt.sign({ userId }, process.env.SECRET_KEY, {
       expiresIn: "10m",
     });
-    // newUser.accessToken = "";
-    // await newUser.save();
     mailSender(token);
 
     res.status(201).json({
@@ -74,15 +72,13 @@ export const register = async (req, res) => {
   }
 };
 
+
 //login
 export const login = async (req, res) => {
   try {
     // Check if the email exists
     const currentUser = await user.findOne({ email: req.body.email });
-    console.log("currentUser",currentUser);
-    
     const userId = currentUser._id;
-    console.log("userId",userId);
     
     if (!currentUser) {
       return res.status(401).json({ error: "Invalid credentials" });
