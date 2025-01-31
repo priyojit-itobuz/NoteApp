@@ -5,8 +5,17 @@ import user from "../models/userModel.js";
 export const addNote = async (req, res) => {
   try {
     const userId = req.body.userId;
-
+    //do insert same title for different user 
     const { title, content } = req.body;
+    const findTitle = await note.findOne({userId,title});
+    if(findTitle)
+    {
+       return res.status(400).json({
+        success : false,
+        message : "Note Title already exists"
+       })
+    }
+    
     const response = await note.create({ title, content, userId });
 
     if (response) {
@@ -120,8 +129,18 @@ export const updateNote = async (req, res) => {
   try {
     const id = req.params.id;
     console.log(id);
+    const userId = req.body.userId;
 
     const { title, content } = req.body;
+    const findTitle = await note.findOne({userId,title});
+    if(findTitle)
+    {
+       return res.status(400).json({
+        success : false,
+        message : "Note Title already exists"
+       })
+    }
+
     const searchNote = await note.findById(id);
     const searchUser = searchNote.userId;
     const findUser = await user.findById(searchUser);
@@ -185,6 +204,8 @@ export const search = async (req, res) => {
     const notes = await note.find({userId,
        title: { $regex: searchText, $options: "i" } 
     });
+
+    
 
     if (notes.length > 0) {
       return res.status(200).json({

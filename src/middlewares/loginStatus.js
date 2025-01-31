@@ -18,7 +18,7 @@ export const isLoggedIn = async (req, res, next) => {
     jwt.verify(accessToken,process.env.SECRET_KEY, async (error, decoded) => {
       if (error) {
         res.status(401).json({ success : false,
-          error: "JWT expired" });
+          error: "Access Token expired" });
       } else 
       {
         const id = decoded.userId;

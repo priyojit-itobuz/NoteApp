@@ -1,9 +1,10 @@
 import express from 'express'
-import dbConnect from './config/dbConnection.js';
+import dbConnect from './src/config/dbConnection.js';
 import dotenv from 'dotenv/config'
-import route from "./routes/userRoute.js"
-import routes from "./routes/noteRoute.js"
+import route from "./src/routes/userRoute.js"
+import routes from "./src/routes/noteRoute.js"
 import fs from 'fs'
+
 
 const app = express();
 app.use(express.json());
@@ -18,6 +19,11 @@ if (!fs.existsSync(dir)){
 
 app.use("/",route)
 app.use("/note",routes)
+
+// to use static files (uploads is my folder which has static files)
+app.use('/uploads', express.static('uploads'))
+
+
 
 app.listen(PORT,() => {
     console.log(`Server up at ${PORT}`);
